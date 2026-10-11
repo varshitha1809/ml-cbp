@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0e0f12" />
+    <title>Form &amp; Folio — AI Drawing Guide</title>
+    <style>
+      :root {
+        --bg: #0e0f12;
+        --panel: rgba(255, 255, 255, 0.04);
+        --panel-border: rgba(255, 255, 255, 0.1);
+        --text: #f3f4f6;
+        --muted: #b5bcc7;
+        --accent: #d9b46f;
+        --shadow: rgba(0, 0, 0, 0.35);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; scroll-padding-top: 94px; }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(217, 180, 111, 0.15), transparent 25%),
+          linear-gradient(135deg, #0e0f12 0%, #12171d 40%, #0b0d10 100%);
+        color: var(--text);
+      }
+      a { color: inherit; text-decoration: none; }
+      button, input { font: inherit; }
+      button { color: inherit; }
+      .container { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(14, 15, 18, 0.86);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--panel-border);
+      }
+      nav {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .brand span { color: var(--accent); }
+      .nav-links { display: flex; gap: 24px; color: var(--muted); font-size: 0.92rem; }
+      .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); }
+
+      .hero { padding: 72px 0 42px; }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 34px;
+        align-items: center;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 20px 0 18px;
+        font-size: clamp(3rem, 6vw, 5rem);
+        line-height: 0.98;
+        letter-spacing: -0.06em;
+      }
+      .highlight { color: var(--accent); }
+      .subtext {
+        max-width: 620px;
+        color: var(--muted);
+        font-size: 1.08rem;
+        line-height: 1.8;
+      }
+      .cta-row { display: flex; gap: 14px; margin-top: 30px; flex-wrap: wrap; }
+      .button {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        padding: 13px 23px;
+        border-radius: 999px;
+        border: 1px solid var(--panel-border);
+        cursor: pointer;
+        transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+      }
+      .button:hover:not(:disabled) { transform: translateY(-2px); }
+      .button:focus-visible, .stage-tab:focus-visible, input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .button.primary {
+        background: linear-gradient(135deg, var(--accent), #f0d7a0);
+        color: #17140d;
+        border: none;
+        font-weight: 700;
+      }
+      .button.secondary { background: transparent; color: var(--text); }
+      .button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .button[aria-disabled="true"] { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+      .hero-card, .panel {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.055));
+        border: 1px solid var(--panel-border);
+        border-radius: 28px;
+        padding: 18px;
+        box-shadow: 0 18px 70px var(--shadow);
+      }
+      .hero-art {
+        position: relative;
+        aspect-ratio: 4 / 3;
+        overflow: hidden;
+        border: 1px solid var(--panel-border);
+        border-radius: 22px;
+        background:
+          linear-gradient(45deg, #22262d 25%, transparent 25%),
+          linear-gradient(-45deg, #22262d 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #22262d 75%),
+          linear-gradient(-45deg, transparent 75%, #22262d 75%), #171a1f;
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+      }
+      .hero-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
+      .art-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; color: var(--muted); font-size: 0.82rem; }
+
+      section { padding: 30px 0 76px; }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 16px;
+        margin-bottom: 26px;
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3rem);
+        letter-spacing: -0.06em;
+      }
+      .section-head p { margin: 0; color: var(--muted); line-height: 1.6; }
+      .section-kicker {
+        margin: 0 0 10px;
+        color: var(--accent);
+        font-size: 0.75rem;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .workspace { scroll-margin-top: 90px; }
+      .upload-panel { padding: clamp(20px, 4vw, 34px); }
+      .drop-zone {
+        display: flex;
+        min-height: 210px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 28px;
+        border: 1px dashed rgba(217, 180, 111, 0.55);
+        border-radius: 22px;
+        background: rgba(217, 180, 111, 0.045);
+        text-align: center;
+        transition: background 0.2s ease, border-color 0.2s ease;
+      }
+      .drop-zone.dragging { background: rgba(217, 180, 111, 0.12); border-color: var(--accent); }
+      .upload-icon { color: var(--accent); font-size: 2rem; line-height: 1; }
+      .drop-zone h3 { margin: 0; font-size: 1.25rem; }
+      .drop-zone p { margin: 0; color: var(--muted); line-height: 1.6; }
+      .formats { font-size: 0.82rem; }
+      .upload-preview {
+        display: none;
+        grid-template-columns: minmax(130px, 220px) 1fr;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+        padding: 14px;
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .upload-preview.visible { display: grid; }
+      .preview-image-wrap {
+        overflow: hidden;
+        aspect-ratio: 4 / 3;
+        border-radius: 12px;
+        background: #171a1f;
+      }
+      .preview-image-wrap img { width: 100%; height: 100%; object-fit: contain; }
+      .preview-copy strong { display: block; overflow-wrap: anywhere; margin-bottom: 7px; }
+      .preview-copy span { color: var(--muted); font-size: 0.86rem; }
+      .upload-actions { display: flex; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; }
+      .loading-indicator { display: none; align-items: center; gap: 10px; color: var(--muted); }
+      .loading-indicator.visible { display: inline-flex; }
+      .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(217, 180, 111, 0.25);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .message { display: none; margin: 16px 0 0; line-height: 1.6; }
+      .message.visible { display: block; }
+      .message.error { color: #ffb4a9; }
+      .message.success { color: #a8d8c6; }
+
+      .result-section { display: none; }
+      .result-section.visible { display: block; }
+      .result-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; align-items: start; }
+      .result-view { min-width: 0; padding: 16px; }
+      .stage-heading { margin: 3px 0 8px; font-size: 1.65rem; letter-spacing: -0.04em; }
+      .stage-instruction { min-height: 3.2em; margin: 0 0 18px; color: var(--muted); line-height: 1.65; }
+      .comparison {
+        --split: 50%;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        border: 1px solid var(--panel-border);
+        border-radius: 18px;
+        background-color: #ece9e1;
+        background-image:
+          linear-gradient(45deg, #d4d1ca 25%, transparent 25%),
+          linear-gradient(-45deg, #d4d1ca 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #d4d1ca 75%),
+          linear-gradient(-45deg, transparent 75%, #d4d1ca 75%);
+        background-size: 18px 18px;
+        background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+      }
+      .comparison img {
+        position: absolute;
+        inset: 0;
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      .comparison .comparison-reference { background: #ece9e1; }
+      .comparison .comparison-drawing { clip-path: inset(0 calc(100% - var(--split)) 0 0); }
+      .comparison .comparison-guides {
+        clip-path: inset(0 calc(100% - var(--split)) 0 0);
+        pointer-events: none;
+      }
+      .compare-divider {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--split);
+        width: 2px;
+        transform: translateX(-50%);
+        background: var(--accent);
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
+        pointer-events: none;
+      }
+      .compare-divider::after {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        border: 2px solid var(--accent);
+        border-radius: 50%;
+        background: #111318;
+        content: "";
+        transform: translate(-50%, -50%);
+      }
+      .compare-label {
+        position: absolute;
+        bottom: 12px;
+        z-index: 1;
+        padding: 6px 9px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        background: rgba(15, 16, 19, 0.82);
+        color: white;
+        font-size: 0.72rem;
+        pointer-events: none;
+      }
+      .compare-label.left { left: 12px; }
+      .compare-label.right { right: 12px; }
+      .slider-row {
+        display: grid;
+        grid-template-columns: auto minmax(80px, 1fr) auto;
+        align-items: center;
+        gap: 12px;
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 0.83rem;
+      }
+      .slider-row input { width: 100%; accent-color: var(--accent); cursor: ew-resize; }
+      .result-controls { padding: 18px; }
+      .result-controls h3 { margin: 0 0 14px; font-size: 1.05rem; }
+      .stage-tabs { display: grid; gap: 8px; }
+      .stage-tab {
+        padding: 11px 12px;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.025);
+        color: var(--muted);
+        text-align: left;
+        cursor: pointer;
+      }
+      .stage-tab[aria-selected="true"] {
+        border-color: rgba(217, 180, 111, 0.6);
+        background: rgba(217, 180, 111, 0.1);
+        color: var(--text);
+      }
+      .stage-tab span { display: block; margin-bottom: 4px; color: var(--accent); font-size: 0.74rem; letter-spacing: 0.08em; }
+      .guide-toggle {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin: 20px 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+      .guide-toggle input { width: 17px; height: 17px; accent-color: var(--accent); }
+      .result-buttons { display: grid; gap: 9px; }
+      .result-buttons .button { width: 100%; padding-inline: 14px; }
+      .result-note { margin: 14px 0 0; color: var(--muted); font-size: 0.78rem; line-height: 1.55; }
+
+      .stage-grid, .capability-grid, .sample-grid { display: grid; gap: 18px; }
+      .stage-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .stage-card, .capability-card, .sample-card {
+        overflow: hidden;
+        border: 1px solid var(--panel-border);
+        border-radius: 22px;
+        background: var(--panel);
+      }
+      .stage-card { padding: 22px; }
+      .stage-number {
+        display: inline-flex;
+        width: 36px;
+        height: 36px;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        border: 1px solid rgba(217, 180, 111, 0.45);
+        border-radius: 50%;
+        color: var(--accent);
+      }
+      .stage-card h3, .capability-card h3, .sample-card h3 { margin: 0 0 9px; font-size: 1.08rem; }
+      .stage-card p, .capability-card p, .sample-card p { margin: 0; color: var(--muted); line-height: 1.7; font-size: 0.9rem; }
+      .capability-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .capability-card { padding: 22px; }
+      .sample-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sample-card { padding: 16px; }
+      .sample-images { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+      .sample-images img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        object-fit: contain;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        background: #efede7;
+      }
+      .sample-caption { display: flex; justify-content: space-between; gap: 8px; margin: 0 0 8px; color: var(--accent); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+      .sample-card p { font-size: 0.84rem; }
+      .format-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .format-tags span { padding: 7px 10px; border: 1px solid var(--panel-border); border-radius: 999px; color: var(--muted); font-size: 0.8rem; }
+      footer { padding: 18px 0 38px; border-top: 1px solid var(--panel-border); color: var(--muted); text-align: center; }
+
+      @media (max-width: 920px) {
+        .stage-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .result-layout { grid-template-columns: minmax(0, 1fr) 250px; }
+      }
+      @media (max-width: 760px) {
+        .hero-grid, .result-layout, .capability-grid, .sample-grid { grid-template-columns: 1fr; }
+        .hero { padding-top: 44px; }
+        .result-controls { order: -1; }
+        .stage-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .section-head { align-items: start; flex-direction: column; }
+        .nav-links { gap: 13px; font-size: 0.82rem; }
+      }
+      @media (max-width: 520px) {
+        .brand { font-size: 0.95rem; letter-spacing: 0.1em; }
+        .nav-links a:nth-child(3) { display: none; }
+        .stage-grid { grid-template-columns: 1fr; }
+        .upload-preview { grid-template-columns: 100px 1fr; }
+        .drop-zone { padding: 22px 14px; }
+        .result-view { padding: 12px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <nav aria-label="Main navigation">
+          <a class="brand" href="#" aria-label="Form and Folio home">Form <span>&amp;</span> Folio</a>
+          <div class="nav-links">
+            <a href="#workspace">Drawing guide</a>
+            <a href="#stages">How it works</a>
+            <a href="#examples">Examples</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div>
+            <div class="eyebrow">Form &amp; Folio · AI Drawing Guide</div>
+            <h1>Turn Any Image into a Drawing, <span class="highlight">Step by Step.</span></h1>
+            <p class="subtext">Upload a photograph or drawing and follow a guided process from basic construction to a clean line-art reference.</p>
+            <div class="cta-row">
+              <a class="button primary" href="#workspace">Start Drawing</a>
+              <a class="button secondary" href="#stages">Explore How It Works</a>
+            </div>
+          </div>
+          <div class="hero-card">
+            <div class="hero-art">
+              <img src="results/00000932.png" alt="A genuine line drawing generated by the project's contour model" />
+            </div>
+            <div class="art-meta">
+              <span>Example output from the contour model</span>
+              <span>Model demo</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace" id="workspace">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Your drawing workspace</p>
+              <h2>Start with your image</h2>
+            </div>
+            <p>Your image is processed locally by the project's pretrained contour model.</p>
+          </div>
+
+          <div class="panel upload-panel">
+            <div class="drop-zone" id="dropZone" aria-label="Image upload drop area">
+              <div class="upload-icon" aria-hidden="true">＋</div>
+              <h3>Upload an Image</h3>
+              <p>Choose a photo or drawing, or drag and drop it here.</p>
+              <p class="formats">Supported formats: JPG, JPEG, PNG, WebP · up to 20 MB</p>
+              <button class="button secondary" id="chooseImage" type="button">Choose Image</button>
+              <input id="fileInput" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" hidden />
+            </div>
+
+            <div class="upload-preview" id="uploadPreview" aria-live="polite">
+              <div class="preview-image-wrap"><img id="previewImage" alt="Selected image preview" /></div>
+              <div class="preview-copy">
+                <strong id="fileName"></strong>
+                <span id="fileSize"></span>
+              </div>
+            </div>
+
+            <div class="upload-actions">
+              <button class="button primary" id="generateButton" type="button" disabled>Generate Drawing Guide</button>
+              <button class="button secondary" id="anotherImageButton" type="button" hidden>Upload Another Image</button>
+              <div class="loading-indicator" id="loadingIndicator" role="status" aria-live="polite">
+                <span class="spinner" aria-hidden="true"></span>
+                <span>Generating your guide with the AI model…</span>
+              </div>
+            </div>
+            <p class="message error" id="errorMessage" role="alert"></p>
+            <p class="message success" id="successMessage" role="status"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="result-section" id="resultSection" aria-labelledby="resultTitle">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Progressive drawing stages</p>
+              <h2>Your drawing guide</h2>
+            </div>
+            <p>Use the comparison slider to reveal your reference and selected guide.</p>
+          </div>
+          <div class="result-layout">
+            <div class="panel result-view">
+              <h3 class="stage-heading" id="resultTitle">Stage 1 — Block It In</h3>
+              <p class="stage-instruction" id="stageInstruction"></p>
+              <div class="comparison" id="comparison" aria-label="Reference and drawing comparison">
+                <img class="comparison-reference" id="comparisonReference" alt="Your uploaded reference image" />
+                <img class="comparison-drawing" id="comparisonDrawing" alt="Selected drawing guide stage" />
+                <img class="comparison-guides" id="comparisonGuides" alt="" aria-hidden="true" />
+                <div class="compare-divider" aria-hidden="true"></div>
+                <span class="compare-label left">Reference</span>
+                <span class="compare-label right" id="drawingLabel">Drawing guide</span>
+              </div>
+              <label class="slider-row" for="comparisonSlider">
+                <span>Reference</span>
+                <input id="comparisonSlider" type="range" min="0" max="100" value="50" aria-label="Compare reference and drawing guide" />
+                <span>Guide</span>
+              </label>
+            </div>
+
+            <aside class="panel result-controls" aria-label="Drawing stage controls">
+              <h3>Drawing stages</h3>
+              <div class="stage-tabs" role="tablist" aria-label="Select a drawing stage">
+                <button class="stage-tab" type="button" role="tab" data-stage="0" aria-selected="true" aria-controls="resultTitle">
+                  <span>STAGE 1</span>Block It In
+                </button>
+                <button class="stage-tab" type="button" role="tab" data-stage="1" aria-selected="false" aria-controls="resultTitle">
+                  <span>STAGE 2</span>Find the Form
+                </button>
+                <button class="stage-tab" type="button" role="tab" data-stage="2" aria-selected="false" aria-controls="resultTitle">
+                  <span>STAGE 3</span>Define the Subject
+                </button>
+                <button class="stage-tab" type="button" role="tab" data-stage="3" aria-selected="false" aria-controls="resultTitle">
+                  <span>STAGE 4</span>Finish the Sketch
+                </button>
+              </div>
+              <label class="guide-toggle">
+                <input id="showGuides" type="checkbox" checked />
+                <span>Show construction guides</span>
+              </label>
+              <div class="result-buttons">
+                <a class="button primary" id="downloadButton" aria-disabled="true">Download This Stage</a>
+                <button class="button secondary" id="replaceButton" type="button">Upload Another Image</button>
+              </div>
+              <p class="result-note">Downloads contain only the selected drawing stage. The reference photograph is never included.</p>
+              <p class="message error" id="downloadError" role="alert"></p>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="stages">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">A guided process</p>
+              <h2>Four stages, one drawing</h2>
+            </div>
+            <p>Each step builds on contours generated by the existing image-to-sketch model.</p>
+          </div>
+          <div class="stage-grid">
+            <article class="stage-card">
+              <span class="stage-number">1</span>
+              <h3>Block It In</h3>
+              <p>Start with the largest shapes. Lightly sketch the basic proportions and use guide lines to position the main features.</p>
+            </article>
+            <article class="stage-card">
+              <span class="stage-number">2</span>
+              <h3>Find the Form</h3>
+              <p>Follow the main outline, paying attention to curves, corners, and the proportions established in the first stage.</p>
+            </article>
+            <article class="stage-card">
+              <span class="stage-number">3</span>
+              <h3>Define the Subject</h3>
+              <p>Add the important details inside the outline. Check their positions and sizes against the main shape.</p>
+            </article>
+            <article class="stage-card">
+              <span class="stage-number">4</span>
+              <h3>Finish the Sketch</h3>
+              <p>Refine the visible lines, remove unnecessary construction guides, and compare the finished sketch with the reference.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Project capabilities</p>
+              <h2>Made for drawing practice</h2>
+            </div>
+            <p>Form &amp; Folio turns the existing contour-drawing research model into a personal reference tool.</p>
+          </div>
+          <div class="capability-grid">
+            <article class="capability-card">
+              <h3>Image-to-sketch inference</h3>
+              <p>Runs the bundled pretrained Pix2Pix generator to create line-art from a photo or drawing.</p>
+            </article>
+            <article class="capability-card">
+              <h3>Progressive reference</h3>
+              <p>Explore geometry guides, generated contour boundaries, model details, and the clean final sketch.</p>
+            </article>
+            <article class="capability-card">
+              <h3>Your image, your guide</h3>
+              <p>Compare the original with each stage, then export the selected stage as a PNG without the photograph.</p>
+            </article>
+          </div>
+          <div class="format-tags" aria-label="Supported image formats">
+            <span>JPG</span><span>JPEG</span><span>PNG</span><span>WebP</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="examples">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Genuine model examples</p>
+              <h2>From image to line art</h2>
+            </div>
+            <p>These examples were processed by the project's existing model; they are not upload results.</p>
+          </div>
+          <div class="sample-grid">
+            <article class="sample-card">
+              <div class="sample-caption"><span>Reference</span><span>Model output</span></div>
+              <div class="sample-images">
+                <img src="examples/00000932.jpg" alt="Example source photograph" />
+                <img src="results/00000932.png" alt="Contour drawing generated from the example photograph" />
+              </div>
+              <h3>Contour study</h3>
+              <p>Example image and its generated contour drawing.</p>
+            </article>
+            <article class="sample-card">
+              <div class="sample-caption"><span>Reference</span><span>Model output</span></div>
+              <div class="sample-images">
+                <img src="examples/bedroom.jpg" alt="Example bedroom source photograph" />
+                <img src="results/bedroom.png" alt="Contour drawing generated from the bedroom photograph" />
+              </div>
+              <h3>Interior study</h3>
+              <p>Example room image and its generated contour drawing.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer><div class="container">Form &amp; Folio · AI Drawing Guide</div></footer>
+
+    <script>
+      const stages = [
+        {
+          title: "Stage 1 — Block It In",
+          instruction: "Start with the largest shapes. Lightly sketch the basic proportions and use guide lines to position the main features.",
+          key: "guides",
+          label: "Construction guides"
+        },
+        {
+          title: "Stage 2 — Find the Form",
+          instruction: "Follow the main outline, paying attention to curves, corners, and the proportions established in the first stage.",
+          key: "contours",
+          label: "Detected contours"
+        },
+        {
+          title: "Stage 3 — Define the Subject",
+          instruction: "Add the important details inside the outline. Check their positions and sizes against the main shape.",
+          key: "details",
+          label: "Generated line details"
+        },
+        {
+          title: "Stage 4 — Finish the Sketch",
+          instruction: "Refine the visible lines, remove unnecessary construction guides, and compare the finished sketch with the reference.",
+          key: "final",
+          label: "Clean final sketch"
+        }
+      ];
+
+      const allowedExtensions = new Set(["jpg", "jpeg", "png", "webp"]);
+      const fileInput = document.getElementById("fileInput");
+      const dropZone = document.getElementById("dropZone");
+      const chooseImageButton = document.getElementById("chooseImage");
+      const generateButton = document.getElementById("generateButton");
+      const previewPanel = document.getElementById("uploadPreview");
+      const previewImage = document.getElementById("previewImage");
+      const errorMessage = document.getElementById("errorMessage");
+      const successMessage = document.getElementById("successMessage");
+      const loadingIndicator = document.getElementById("loadingIndicator");
+      const resultSection = document.getElementById("resultSection");
+      const comparison = document.getElementById("comparison");
+      const comparisonReference = document.getElementById("comparisonReference");
+      const comparisonDrawing = document.getElementById("comparisonDrawing");
+      const comparisonGuides = document.getElementById("comparisonGuides");
+      const comparisonSlider = document.getElementById("comparisonSlider");
+      const showGuides = document.getElementById("showGuides");
+      const stageTabs = Array.from(document.querySelectorAll(".stage-tab"));
+      let selectedFile = null;
+      let previewUrl = null;
+      let result = null;
+      let selectedStage = 0;
+      let generating = false;
+
+      function updateDownloadButton() {
+        const needsGuides = selectedStage === 0 && !showGuides.checked;
+        const stageReady = comparisonDrawing.complete && comparisonDrawing.naturalWidth > 0;
+        const includeGuides = showGuides.checked && selectedStage > 0 && selectedStage < 3;
+        const guidesReady = !includeGuides || (comparisonGuides.complete && comparisonGuides.naturalWidth > 0);
+        const downloadLink = document.getElementById("downloadButton");
+        if (needsGuides) {
+          downloadLink.removeAttribute("href");
+          downloadLink.setAttribute("aria-disabled", "true");
+          showMessage(document.getElementById("downloadError"), "Turn on construction guides to download Stage 1.");
+          return;
+        }
+        if (!stageReady || !guidesReady) {
+          downloadLink.removeAttribute("href");
+          downloadLink.setAttribute("aria-disabled", "true");
+          showMessage(document.getElementById("downloadError"), "Preparing this stage for download…");
+          return;
+        }
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = result.width;
+          canvas.height = result.height;
+          const context = canvas.getContext("2d");
+          context.clearRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(comparisonDrawing, 0, 0, canvas.width, canvas.height);
+          if (includeGuides) {
+            context.drawImage(comparisonGuides, 0, 0, canvas.width, canvas.height);
+          }
+          downloadLink.href = canvas.toDataURL("image/png");
+          downloadLink.download = `form-folio-stage-${selectedStage + 1}.png`;
+          downloadLink.setAttribute("aria-disabled", "false");
+          showMessage(document.getElementById("downloadError"), "");
+        } catch (error) {
+          downloadLink.removeAttribute("href");
+          downloadLink.setAttribute("aria-disabled", "true");
+          showMessage(document.getElementById("downloadError"), error.message || "The stage could not be prepared for download.");
+        }
+      }
+
+      comparisonDrawing.addEventListener("load", updateDownloadButton);
+      comparisonDrawing.addEventListener("error", () => {
+        showMessage(errorMessage, "The selected drawing stage could not be displayed.");
+      });
+      comparisonGuides.addEventListener("load", updateDownloadButton);
+
+      function showMessage(element, message) {
+        element.textContent = message;
+        element.classList.toggle("visible", Boolean(message));
+      }
+
+      function clearResult() {
+        result = null;
+        resultSection.classList.remove("visible");
+        document.getElementById("downloadButton").removeAttribute("href");
+        document.getElementById("downloadButton").setAttribute("aria-disabled", "true");
+        comparisonReference.removeAttribute("src");
+        comparisonDrawing.removeAttribute("src");
+        comparisonGuides.removeAttribute("src");
+      }
+
+      function resetForNewFile() {
+        clearResult();
+        showMessage(successMessage, "");
+        showMessage(document.getElementById("downloadError"), "");
+      }
+
+      function validateAndSelectFile(file) {
+        if (generating) return;
+        showMessage(errorMessage, "");
+        showMessage(successMessage, "");
+        if (!file) return;
+
+        resetForNewFile();
+        const extension = file.name.split(".").pop().toLowerCase();
+        if (!allowedExtensions.has(extension)) {
+          selectedFile = null;
+          fileInput.value = "";
+          previewPanel.classList.remove("visible");
+          generateButton.disabled = true;
+          showMessage(errorMessage, "Unsupported file. Please choose a JPG, JPEG, PNG, or WebP image.");
+          return;
+        }
+        if (file.size === 0) {
+          selectedFile = null;
+          fileInput.value = "";
+          previewPanel.classList.remove("visible");
+          generateButton.disabled = true;
+          showMessage(errorMessage, "This file is empty. Choose a valid image and try again.");
+          return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          selectedFile = null;
+          fileInput.value = "";
+          previewPanel.classList.remove("visible");
+          generateButton.disabled = true;
+          showMessage(errorMessage, "Choose an image file smaller than 20 MB.");
+          return;
+        }
+
+        selectedFile = file;
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = URL.createObjectURL(file);
+        previewImage.src = previewUrl;
+        document.getElementById("fileName").textContent = file.name;
+        document.getElementById("fileSize").textContent = (file.size / 1024 / 1024).toFixed(2) + " MB";
+        previewPanel.classList.add("visible");
+        generateButton.disabled = false;
+      }
+
+      chooseImageButton.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => validateAndSelectFile(fileInput.files[0]));
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.add("dragging");
+        });
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          dropZone.classList.remove("dragging");
+        });
+      });
+      dropZone.addEventListener("drop", (event) => {
+        validateAndSelectFile(event.dataTransfer.files[0]);
+      });
+
+      function updateComparison() {
+        comparison.style.setProperty("--split", comparisonSlider.value + "%");
+      }
+      comparisonSlider.addEventListener("input", updateComparison);
+      updateComparison();
+
+      function renderStage(index) {
+        selectedStage = index;
+        const stage = stages[index];
+        if (!result) return;
+
+        stageTabs.forEach((tab, tabIndex) => {
+          tab.setAttribute("aria-selected", String(tabIndex === index));
+          tab.tabIndex = tabIndex === index ? 0 : -1;
+        });
+        document.getElementById("resultTitle").textContent = stage.title;
+        document.getElementById("stageInstruction").textContent = stage.instruction;
+        document.getElementById("drawingLabel").textContent = stage.label;
+        comparisonDrawing.removeAttribute("src");
+        comparisonDrawing.src = result[stage.key];
+        comparisonDrawing.alt = stage.title + " drawing guide";
+        comparisonDrawing.style.display = index !== 0 || showGuides.checked ? "block" : "none";
+        comparisonGuides.src = result.guides;
+        comparisonGuides.style.display = showGuides.checked && index > 0 && index < 3 ? "block" : "none";
+        comparisonGuides.style.opacity = "0.75";
+        comparisonGuides.style.clipPath = `inset(0 calc(100% - ${comparisonSlider.value}%) 0 0)`;
+        updateDownloadButton();
+      }
+
+      stageTabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => renderStage(index));
+        tab.addEventListener("keydown", (event) => {
+          if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+            event.preventDefault();
+            const offset = event.key === "ArrowRight" ? 1 : -1;
+            const nextIndex = (index + offset + stageTabs.length) % stageTabs.length;
+            stageTabs[nextIndex].focus();
+            renderStage(nextIndex);
+          }
+        });
+      });
+
+      showGuides.addEventListener("change", () => renderStage(selectedStage));
+      comparisonSlider.addEventListener("input", () => {
+        if (result && selectedStage !== 0) {
+          comparisonGuides.style.clipPath = `inset(0 calc(100% - ${comparisonSlider.value}%) 0 0)`;
+        }
+      });
+
+      generateButton.addEventListener("click", async () => {
+        if (!selectedFile || generating) return;
+
+        generating = true;
+        generateButton.disabled = true;
+        chooseImageButton.disabled = true;
+        document.getElementById("anotherImageButton").hidden = true;
+        loadingIndicator.classList.add("visible");
+        showMessage(errorMessage, "");
+        showMessage(successMessage, "");
+        clearResult();
+        try {
+          const response = await fetch("/api/generate?filename=" + encodeURIComponent(selectedFile.name), {
+            method: "POST",
+            headers: { "Content-Type": selectedFile.type || "application/octet-stream" },
+            body: selectedFile
+          });
+          const payload = await response.json();
+          if (!response.ok) {
+            throw new Error(payload.error || "The drawing guide could not be generated. Please try again.");
+          }
+          result = payload;
+          comparisonReference.src = previewUrl;
+          comparison.style.aspectRatio = payload.width + " / " + payload.height;
+          comparisonSlider.value = "50";
+          updateComparison();
+          resultSection.classList.add("visible");
+          renderStage(0);
+          document.getElementById("anotherImageButton").hidden = false;
+          showMessage(successMessage, "Your drawing guide is ready. Choose a stage to continue.");
+          resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (error) {
+          showMessage(errorMessage, error.message || "Image processing failed. Please try another image.");
+        } finally {
+          generating = false;
+          generateButton.disabled = !selectedFile;
+          chooseImageButton.disabled = false;
+          loadingIndicator.classList.remove("visible");
+        }
+      });
+
+      function restartUpload() {
+        resetForNewFile();
+        selectedFile = null;
+        fileInput.value = "";
+        previewPanel.classList.remove("visible");
+        generateButton.disabled = true;
+        showMessage(errorMessage, "");
+        document.getElementById("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+        fileInput.click();
+      }
+      document.getElementById("replaceButton").addEventListener("click", restartUpload);
+      document.getElementById("anotherImageButton").addEventListener("click", restartUpload);
+    </script>
+  </body>
+</html>
