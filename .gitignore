@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Model cache (Hugging Face downloads)
+models/
+*.bin
+*.safetensors
+
+# Generated test images
+test_sketch.png
+test_output.png
+output/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# Node.js / Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+package-lock.json
+!frontend/package-lock.json
+
+# Vite build artifacts
+.vite/
